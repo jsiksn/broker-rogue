@@ -1,29 +1,35 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, MODE_CONFIG, INITIAL_CASH } from '../src/store/gameStore';
 import { formatPrice, formatPercent } from '../src/game/market';
 
 export default function GameOverScreen() {
   const router = useRouter();
-  const { status, day, cash, shares, currentPrice, peakAssets, startGame, mode } = useGameStore();
+  const { status, day, cash, shares, currentPrice, peakAssets, mode } = useGameStore();
   const { totalDays, winGoal } = MODE_CONFIG[mode];
 
   const totalAssets = cash + shares * currentPrice;
   const totalReturn = (totalAssets - INITIAL_CASH) / INITIAL_CASH;
   const isWin = status === 'win';
 
-  const handleRetry = () => {
-    startGame(mode);
-    router.replace('/game');
-  };
+  const gradientColors: [string, string] = isWin
+    ? ['#059669', '#2563EB']
+    : ['#7f1d1d', '#1e1b4b'];
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={[styles.statusLabel, { color: isWin ? '#00d97e' : '#FF2D2D' }]}>
+      {/* 헤더 */}
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        <Text style={styles.statusLabel}>
           {isWin ? 'VICTORY' : 'GAME OVER'}
         </Text>
-        <Text style={styles.result}>{isWin ? '성공' : '파산'}</Text>
+        <Text style={styles.result}>{isWin ? '목표 달성' : '파산'}</Text>
         <Text style={styles.subtitle}>
           {isWin
             ? `${day - 1}일 만에 목표 달성!`
@@ -31,68 +37,54 @@ export default function GameOverScreen() {
             ? `${totalDays}일을 버텼지만 목표 미달.`
             : `Day ${day - 1}에 자산이 바닥났습니다.`}
         </Text>
+      </LinearGradient>
 
-        <View style={styles.statsBox}>
-          <StatRow
-            label="생존 일수"
-            value={`Day ${Math.min(day - 1, totalDays)}`}
-          />
+      {/* 스탯 */}
+      <View style={styles.body}>
+        <View style={styles.statsCard}>
+          <StatRow label="생존 일수" value={`Day ${Math.min(day - 1, totalDays)}`} />
           <StatRow
             label="최종 자산"
             value={formatPrice(totalAssets)}
-            valueColor={totalAssets >= winGoal ? '#00d97e' : '#FFFFFF'}
+            valueColor={totalAssets >= winGoal ? '#059669' : '#DC2626'}
           />
-          <StatRow
-            label="최고 자산"
-            value={formatPrice(peakAssets)}
-          />
+          <StatRow label="최고 자산" value={formatPrice(peakAssets)} />
           <StatRow
             label="총 수익률"
             value={formatPercent(totalReturn)}
-            valueColor={totalReturn >= 0 ? '#00d97e' : '#FF2D2D'}
+            valueColor={totalReturn >= 0 ? '#059669' : '#DC2626'}
           />
+          <StatRow label="목표 금액" value={formatPrice(winGoal)} isLast />
         </View>
-      </View>
 
-      <View style={styles.buttonGroup}>
         <Pressable
-          style={({ pressed }) => [
-            styles.primaryButton,
-            { backgroundColor: isWin ? '#00d97e' : '#FF2D2D' },
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleRetry}
-        >
-          <Text style={[styles.primaryButtonText, { color: isWin ? '#000000' : '#FFFFFF' }]}>
-            RETRY
-          </Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}
+          style={({ pressed }) => [styles.mainButton, pressed && styles.buttonPressed]}
           onPress={() => router.replace('/')}
         >
-          <Text style={styles.secondaryButtonText}>MAIN MENU</Text>
+          <LinearGradient
+            colors={['#059669', '#2563EB']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.mainButtonGradient}
+          >
+            <Text style={styles.mainButtonText}>MAIN MENU</Text>
+          </LinearGradient>
         </Pressable>
       </View>
     </View>
   );
 }
 
-function StatRow({
-  label,
-  value,
-  valueColor,
-}: {
+function StatRow({ label, value, valueColor, isLast }: {
   label: string;
   value: string;
   valueColor?: string;
+  isLast?: boolean;
 }) {
   return (
-    <View style={statStyles.row}>
+    <View style={[statStyles.row, isLast && { borderBottomWidth: 0 }]}>
       <Text style={statStyles.label}>{label}</Text>
-      <Text style={[statStyles.value, valueColor ? { color: valueColor } : null]}>
-        {value}
-      </Text>
+      <Text style={[statStyles.value, valueColor ? { color: valueColor } : null]}>{value}</Text>
     </View>
   );
 }
@@ -100,68 +92,74 @@ function StatRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
-    paddingHorizontal: 24,
-    paddingTop: 100,
-    paddingBottom: 48,
-    justifyContent: 'space-between',
+    backgroundColor: '#F8FAFC',
   },
-  content: {
-    alignItems: 'center',
+  header: {
+    paddingTop: 80,
+    paddingBottom: 36,
+    paddingHorizontal: 24,
   },
   statusLabel: {
-    fontSize: 11,
-    letterSpacing: 6,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 10,
+    letterSpacing: 4,
     fontWeight: '700',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   result: {
     color: '#FFFFFF',
-    fontSize: 72,
+    fontSize: 48,
     fontWeight: '900',
     letterSpacing: -2,
+    lineHeight: 52,
     marginBottom: 8,
   },
   subtitle: {
-    color: '#888888',
+    color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
-    marginBottom: 48,
   },
-  statsBox: {
-    width: '100%',
+  body: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 36,
+    gap: 16,
+    justifyContent: 'flex-end',
+  },
+  statsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#1a1a1a',
-    borderRadius: 4,
+    borderColor: '#E2E8F0',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  buttonGroup: {
-    gap: 12,
+  mainButton: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#059669',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  primaryButton: {
+  mainButtonGradient: {
     paddingVertical: 18,
-    borderRadius: 4,
     alignItems: 'center',
   },
-  primaryButtonText: {
-    fontSize: 16,
+  mainButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '900',
     letterSpacing: 4,
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: '#333333',
-    paddingVertical: 18,
-    borderRadius: 4,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#AAAAAA',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 3,
-  },
   buttonPressed: {
-    opacity: 0.8,
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
 });
 
@@ -169,18 +167,17 @@ const statStyles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#0f0f0f',
-    backgroundColor: '#050505',
+    borderBottomColor: '#F1F5F9',
   },
   label: {
-    color: '#888888',
+    color: '#718096',
     fontSize: 13,
   },
   value: {
-    color: '#FFFFFF',
+    color: '#1A202C',
     fontSize: 13,
     fontWeight: '700',
   },

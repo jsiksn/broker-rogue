@@ -145,15 +145,15 @@ export default function GameScreen() {
           </Pressable>
           <Pressable style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }} onPress={() => {
             Alert.alert(
-              '게임 재시작',
-              '처음부터 다시 시작하겠습니까?\n현재 진행 상황은 저장되지 않습니다.',
+              '메인 화면으로',
+              '메인 화면으로 나가겠습니까?\n현재 진행 상황은 저장되지 않습니다.',
               [
                 { text: '취소', style: 'cancel' },
-                { text: '재시작', style: 'destructive', onPress: () => { initialized.current = false; startGame(); initialized.current = true; } },
+                { text: '나가기', style: 'destructive', onPress: () => router.replace('/') },
               ]
             );
           }}>
-            <Feather name="refresh-cw" size={17} color="#94A3B8" />
+            <Feather name="home" size={17} color="#94A3B8" />
           </Pressable>
         </View>
       </LinearGradient>
@@ -186,6 +186,7 @@ export default function GameScreen() {
         avgBuyPrice={state.avgBuyPrice}
         nextPriceDirection={nextPriceDirection}
         isDark={isDark}
+        winGoal={MODE_CONFIG[mode].winGoal}
       />
 
       {/* 카드 */}

@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { formatPrice, formatPercent } from '../game/market';
-import { WIN_GOAL, INITIAL_CASH } from '../store/gameStore';
+import { INITIAL_CASH } from '../store/gameStore';
 
 type Props = {
   cash: number;
@@ -10,6 +10,7 @@ type Props = {
   avgBuyPrice: number;
   nextPriceDirection: 'up' | 'down' | null;
   isDark: boolean;
+  winGoal: number;
 };
 
 export default function PortfolioCard({
@@ -19,13 +20,14 @@ export default function PortfolioCard({
   avgBuyPrice,
   nextPriceDirection,
   isDark,
+  winGoal,
 }: Props) {
   const sharesValue = shares * currentPrice;
   const totalAssets = cash + sharesValue;
   const totalReturn = totalAssets - INITIAL_CASH;
   const totalReturnRate = totalReturn / INITIAL_CASH;
   const isPositive = totalReturn >= 0;
-  const goalProgress = Math.min(totalAssets / WIN_GOAL, 1);
+  const goalProgress = Math.min(totalAssets / winGoal, 1);
 
   const border = isDark ? '#2e3f5c' : 'transparent';
   const statBg = isDark ? '#1a2030' : '#FFFFFF';
