@@ -27,15 +27,19 @@ Use trading cards each day to influence the market and maximize your portfolio.
 
 매일 장이 열리면 실시간으로 주가가 움직입니다 (08:00 ~ 16:00).
 손패에서 카드를 플레이한 뒤 NEXT DAY를 눌러 다음 날로 넘어갑니다.
+매 턴 손패에는 매수/분할매수 중 최소 1장, 매도/분할매도 중 최소 1장이 보장됩니다.
+오늘 종가가 내일 시작가로 이어져 오버나이트 갭이 없습니다. 주가 하한선은 $1입니다.
 
 Each day, the market runs in real time (08:00–16:00).
 Play cards from your hand, then advance to the next day.
+Each hand is guaranteed to contain at least 1 buy card and 1 sell card.
+Today's close becomes tomorrow's open (no overnight gap). Price floor is $1.
 
 ---
 
 ## Cards
 
-### Common ★
+### Common ★ (각 3장)
 | 카드 | 효과 |
 |------|------|
 | 매수 | 보유 현금 전량으로 주식 매수 |
@@ -43,12 +47,12 @@ Play cards from your hand, then advance to the next day.
 | 매도 | 보유 주식 전량 매도 |
 | 분할 매도 | 보유 주식의 50% 매도 |
 
-### Rare ★★
+### Rare ★★ (각 2장)
 | 카드 | 효과 |
 |------|------|
 | 물타기 | P&L 마이너스 상태에서만 사용 가능. 현금 전량으로 10% 효율 추가 매수 |
-| 작전 | 세력 동원 — 다음 턴 주가를 +5~15% 강제 상승 |
-| 가짜뉴스 *(미개발)* | 다음 턴 변동성 2.5배 폭발 |
+| 작전 | 세력 동원 — 다음 턴 주가를 +5~15% 강제 상승 (3–8초 랜덤 애니메이션) |
+| 가짜뉴스 | 루머 유포 — 다음 날 장중 변동성을 2.5배로 폭발 |
 
 ### Legendary ★★★
 | 카드 | 효과 |
@@ -141,10 +145,12 @@ src/
 ## Win / Lose Conditions
 
 - **WIN** 🏆 — 총 자산이 목표 금액 이상
-- **LOSE** 💀 — 총 자산이 $100 미만, 또는 기간 종료 시 목표 미달
+- **LOSE (파산)** 💀 — 총 자산이 $10 미만
+- **LOSE (목표 미달)** 💀 — 기간 종료 시 목표 미달
 
 - **WIN** 🏆 — Total assets reach the mode goal
-- **LOSE** 💀 — Total assets drop below $100, or goal not reached by the final day
+- **LOSE (Bankrupt)** 💀 — Total assets drop below $10
+- **LOSE (Goal not reached)** 💀 — Goal not reached by the final day
 
 ---
 
