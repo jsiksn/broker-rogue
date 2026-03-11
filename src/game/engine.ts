@@ -1,7 +1,7 @@
 // 게임 엔진 상수 및 유틸리티
 // 핵심 로직은 gameStore.ts에 위치
 
-export { TOTAL_DAYS, INITIAL_CASH, WIN_GOAL } from '../store/gameStore';
+export { INITIAL_CASH, MODE_CONFIG } from '../store/gameStore';
 
 // 카드 희귀도 색상
 export const RARITY_COLORS = {

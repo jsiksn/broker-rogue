@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Alert, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useGameStore, TOTAL_DAYS } from '../src/store/gameStore';
+import { useGameStore, MODE_CONFIG } from '../src/store/gameStore';
 import StockChart from '../src/components/StockChart';
 import PortfolioCard from '../src/components/PortfolioCard';
 import CardFan from '../src/components/CardFan';
@@ -15,7 +15,7 @@ export default function GameScreen() {
   const initialized = useRef(false);
 
   const state = useGameStore();
-  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending } = state;
+  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending, mode } = state;
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [isDark, setIsDark] = useState(false);
 
@@ -30,7 +30,7 @@ export default function GameScreen() {
   const pumpAnimRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!initialized.current) { startGame(); initialized.current = true; }
+    if (!initialized.current) { initialized.current = true; if (status !== 'playing') startGame('cartel'); }
   }, []);
 
   useEffect(() => {
@@ -137,7 +137,7 @@ export default function GameScreen() {
         <Text style={styles.gameTitle}>Broker Rogue</Text>
         <View style={styles.dayBadge}>
           <View style={[styles.dayDot, { backgroundColor: accent }]} />
-          <Text style={styles.dayText}>Day {day}/{TOTAL_DAYS}</Text>
+          <Text style={styles.dayText}>Day {day}/{MODE_CONFIG[mode].totalDays}</Text>
         </View>
         <View style={styles.headerIcons}>
           <Pressable onPress={() => setIsDark(d => !d)}>

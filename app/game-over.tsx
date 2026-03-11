@@ -1,18 +1,19 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useGameStore, TOTAL_DAYS, WIN_GOAL, INITIAL_CASH } from '../src/store/gameStore';
+import { useGameStore, MODE_CONFIG, INITIAL_CASH } from '../src/store/gameStore';
 import { formatPrice, formatPercent } from '../src/game/market';
 
 export default function GameOverScreen() {
   const router = useRouter();
-  const { status, day, cash, shares, currentPrice, peakAssets, startGame } = useGameStore();
+  const { status, day, cash, shares, currentPrice, peakAssets, startGame, mode } = useGameStore();
+  const { totalDays, winGoal } = MODE_CONFIG[mode];
 
   const totalAssets = cash + shares * currentPrice;
   const totalReturn = (totalAssets - INITIAL_CASH) / INITIAL_CASH;
   const isWin = status === 'win';
 
   const handleRetry = () => {
-    startGame();
+    startGame(mode);
     router.replace('/game');
   };
 
@@ -26,20 +27,20 @@ export default function GameOverScreen() {
         <Text style={styles.subtitle}>
           {isWin
             ? `${day - 1}일 만에 목표 달성!`
-            : day > TOTAL_DAYS
-            ? '20일을 버텼지만 목표 미달.'
+            : day > totalDays
+            ? `${totalDays}일을 버텼지만 목표 미달.`
             : `Day ${day - 1}에 자산이 바닥났습니다.`}
         </Text>
 
         <View style={styles.statsBox}>
           <StatRow
             label="생존 일수"
-            value={`Day ${Math.min(day - 1, TOTAL_DAYS)}`}
+            value={`Day ${Math.min(day - 1, totalDays)}`}
           />
           <StatRow
             label="최종 자산"
             value={formatPrice(totalAssets)}
-            valueColor={totalAssets >= WIN_GOAL ? '#00d97e' : '#FFFFFF'}
+            valueColor={totalAssets >= winGoal ? '#00d97e' : '#FFFFFF'}
           />
           <StatRow
             label="최고 자산"

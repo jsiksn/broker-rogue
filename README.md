@@ -1,8 +1,8 @@
 # Broker Rogue
 
-> 합법과 불법을 넘나드는 20일 주식 생존기
+> 합법과 불법을 넘나드는 주식 생존기
 
-> A 20-day rogue-lite stock trading survival game
+> A rogue-lite stock trading survival game
 
 ![demo](assets/demo.gif)
 
@@ -10,28 +10,26 @@
 
 ## Overview
 
-$10,000으로 시작해 20일 안에 $100,000을 만드세요.
+$10,000으로 시작해 목표 자산에 도달하세요.
 매일 주어지는 트레이딩 카드를 사용해 시장을 유리하게 이끌고, 목표 자산에 도달하면 승리합니다.
 
-Start with **$10,000** and reach **$100,000** within **20 days**.
+Start with **$10,000** and reach your goal within the time limit.
 Use trading cards each day to influence the market and maximize your portfolio.
 
 ---
 
-## Gameplay
+## Game Modes
 
-| 항목 | 내용 |
-|------|------|
-| 시작 자산 | $10,000 |
-| 목표 자산 | $100,000 |
-| 게임 기간 | 20일 |
-| 손패 크기 | 5장 |
+| 모드 | 기간 | 목표 |
+|------|------|------|
+| Retail (개미) | 10일 | $30,000 |
+| Cartel (세력) | 20일 | $100,000 |
 
 매일 장이 열리면 실시간으로 주가가 움직입니다 (08:00 ~ 16:00).
-손패에서 카드를 한 장 플레이한 뒤 NEXT DAY를 눌러 다음 날로 넘어갑니다.
+손패에서 카드를 플레이한 뒤 NEXT DAY를 눌러 다음 날로 넘어갑니다.
 
 Each day, the market runs in real time (08:00–16:00).
-Play one card from your hand, then advance to the next day.
+Play cards from your hand, then advance to the next day.
 
 ---
 
@@ -49,7 +47,7 @@ Play one card from your hand, then advance to the next day.
 | 카드 | 효과 |
 |------|------|
 | 물타기 | P&L 마이너스 상태에서만 사용 가능. 현금 전량으로 10% 효율 추가 매수 |
-| 작전 | 세력 동원 — 주가를 일시적으로 최대 +10% 끌어올림 |
+| 작전 | 세력 동원 — 다음 턴 주가를 +5~15% 강제 상승 |
 | 가짜뉴스 *(미개발)* | 다음 턴 변동성 2.5배 폭발 |
 
 ### Legendary ★★★
@@ -100,7 +98,7 @@ Run on iOS Simulator, Android Emulator, or the Expo Go app.
 
 ```
 app/
-  index.tsx        # 타이틀 화면
+  index.tsx        # 타이틀 / 모드 선택 화면
   game.tsx         # 메인 게임 화면
   game-over.tsx    # 게임 오버 화면
 
@@ -120,7 +118,7 @@ src/
 
 ```
 app/
-  index.tsx        # Title screen
+  index.tsx        # Title / mode select screen
   game.tsx         # Main game screen
   game-over.tsx    # Game over screen
 
@@ -142,11 +140,11 @@ src/
 
 ## Win / Lose Conditions
 
-- **WIN** 🏆 — 총 자산이 $100,000 이상
-- **LOSE** 💀 — 총 자산이 $100 미만, 또는 20일 종료 시 목표 미달
+- **WIN** 🏆 — 총 자산이 목표 금액 이상
+- **LOSE** 💀 — 총 자산이 $100 미만, 또는 기간 종료 시 목표 미달
 
-- **WIN** 🏆 — Total assets reach $100,000
-- **LOSE** 💀 — Total assets drop below $100, or goal not reached by Day 20
+- **WIN** 🏆 — Total assets reach the mode goal
+- **LOSE** 💀 — Total assets drop below $100, or goal not reached by the final day
 
 ---
 

@@ -8,9 +8,14 @@ import {
   formatPercent,
 } from '../game/market';
 
-export const TOTAL_DAYS = 20;
 export const INITIAL_CASH = 10_000;
-export const WIN_GOAL = 100_000;
+
+export type GameMode = 'retail' | 'cartel';
+
+export const MODE_CONFIG: Record<GameMode, { totalDays: number; winGoal: number }> = {
+  retail: { totalDays: 10, winGoal: 30_000 },
+  cartel: { totalDays: 20, winGoal: 100_000 },
+};
 
 export type GamePhase = 'draw' | 'play' | 'resolve' | 'upgrade';
 export type GameStatus = 'playing' | 'win' | 'lose';
@@ -51,8 +56,11 @@ export type GameState = {
   peakAssets: number;
   nextPriceDirection: 'up' | 'down' | null; // 내부자 정보로 공개된 방향
 
+  // 모드
+  mode: GameMode;
+
   // 액션
-  startGame: () => void;
+  startGame: (mode: GameMode) => void;
   playCard: (cardIndex: number, livePrice?: number) => void;
   endTurn: () => void;
   setCurrentPrice: (price: number) => void;
@@ -65,12 +73,24 @@ const DEFAULT_PENDING: PendingEffect = {
   leverageMultiplier: 1,
 };
 
+function isRareOrLegendary(c: CardId) {
+  return CARDS[c].rarity === 'rare' || CARDS[c].rarity === 'legendary';
+}
+
 function drawHand(deck: CardId[]): { hand: CardId[]; remaining: CardId[] } {
   const shuffled = [...deck].sort(() => Math.random() - 0.5);
-  return {
-    hand: shuffled.slice(0, HAND_SIZE),
-    remaining: shuffled.slice(HAND_SIZE),
-  };
+  const hand: CardId[] = [];
+  const remaining: CardId[] = [];
+  const rareInHand = new Set<CardId>();
+  for (const c of shuffled) {
+    if (hand.length < HAND_SIZE && !(isRareOrLegendary(c) && rareInHand.has(c))) {
+      hand.push(c);
+      if (isRareOrLegendary(c)) rareInHand.add(c);
+    } else {
+      remaining.push(c);
+    }
+  }
+  return { hand, remaining };
 }
 
 // 다양성 가중 뽑기: 손패에 없는 카드 종류를 3배 높은 확률로 뽑음
@@ -78,10 +98,15 @@ function weightedDraw(pool: CardId[], existingHand: CardId[], count: number): { 
   const poolCopy = [...pool];
   const drawn: CardId[] = [];
   const handTypes = new Set(existingHand);
+  const drawnTypes = new Set<CardId>();
 
   for (let i = 0; i < count && poolCopy.length > 0; i++) {
-    const weights = poolCopy.map(c => handTypes.has(c) ? 1 : 3);
+    const weights = poolCopy.map(c => {
+      if (isRareOrLegendary(c) && drawnTypes.has(c)) return 0;
+      return handTypes.has(c) ? 1 : 3;
+    });
     const total = weights.reduce((a, b) => a + b, 0);
+    if (total === 0) break;
     let rand = Math.random() * total;
     let idx = poolCopy.length - 1;
     for (let j = 0; j < weights.length; j++) {
@@ -90,6 +115,7 @@ function weightedDraw(pool: CardId[], existingHand: CardId[], count: number): { 
     }
     drawn.push(poolCopy[idx]);
     handTypes.add(poolCopy[idx]);
+    drawnTypes.add(poolCopy[idx]);
     poolCopy.splice(idx, 1);
   }
   return { drawn, remaining: poolCopy };
@@ -116,8 +142,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   pending: { ...DEFAULT_PENDING },
   peakAssets: INITIAL_CASH,
   nextPriceDirection: null,
+  mode: 'cartel' as GameMode,
 
-  startGame: () => {
+  startGame: (mode: GameMode) => {
     const { hand: rawHand, remaining: rawRemaining } = drawHand([...INITIAL_DECK]);
     const buyTypes: CardId[] = ['buy', 'partial_buy'];
     let hand = [...rawHand];
@@ -139,6 +166,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     set({
+      mode,
       status: 'playing',
       phase: 'play',
       day: 1,
@@ -282,11 +310,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     const newPeak = Math.max(state.peakAssets, totalAssets);
 
     // 승패 판정
-    const isLastDay = state.day >= TOTAL_DAYS;
+    const { totalDays, winGoal } = MODE_CONFIG[state.mode];
+    const isLastDay = state.day >= totalDays;
     let newStatus: GameStatus = 'playing';
-    if (totalAssets >= WIN_GOAL) {
+    if (totalAssets >= winGoal) {
       newStatus = 'win';
-    } else if (totalAssets < 100 || (isLastDay && totalAssets < WIN_GOAL)) {
+    } else if (totalAssets < 100 || (isLastDay && totalAssets < winGoal)) {
       newStatus = 'lose';
     }
 

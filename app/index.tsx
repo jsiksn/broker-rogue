@@ -2,9 +2,16 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
+import { useGameStore, GameMode, MODE_CONFIG } from '../src/store/gameStore';
 
 export default function TitleScreen() {
   const router = useRouter();
+  const startGame = useGameStore(s => s.startGame);
+
+  const handleStart = (mode: GameMode) => {
+    startGame(mode);
+    router.push('/game');
+  };
 
   return (
     <View style={styles.container}>
@@ -18,36 +25,66 @@ export default function TitleScreen() {
         <Text style={styles.subtitle}>ROGUE TRADER SIMULATOR</Text>
         <Text style={styles.title}>Broker</Text>
         <Text style={styles.titleAccent}>Rogue</Text>
-        <Text style={styles.tagline}>합법과 불법을 넘나드는 20일 생존기</Text>
+        <Text style={styles.tagline}>합법과 불법을 넘나드는 주식 생존기</Text>
       </LinearGradient>
 
       {/* 본문 */}
       <View style={styles.body}>
-        {/* 스탯 카드 */}
-        <View style={styles.statsRow}>
-          <StatCard icon="calendar" value="20" label="DAYS" />
-          <StatCard icon="dollar-sign" value="$10K" label="START" />
-          <StatCard icon="target" value="$100K" label="GOAL" />
-        </View>
+        <Text style={styles.modeLabel}>모드 선택</Text>
 
-        {/* 카드 미리보기 힌트 */}
-        <View style={styles.hintCard}>
-          <Feather name="zap" size={14} color="#F59E0B" />
-          <Text style={styles.hintText}>트레이딩 카드로 시장을 지배하라</Text>
-        </View>
-
-        {/* NEW GAME 버튼 */}
+        {/* Retail (개미) */}
         <Pressable
-          style={({ pressed }) => [styles.startButton, pressed && styles.buttonPressed]}
-          onPress={() => router.push('/game')}
+          style={({ pressed }) => [styles.modeButton, pressed && styles.buttonPressed]}
+          onPress={() => handleStart('retail')}
         >
           <LinearGradient
-            colors={['#F59E0B', '#EA580C']}
+            colors={['#059669', '#0284C7']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.startGradient}
+            style={styles.modeGradient}
           >
-            <Text style={styles.startButtonText}>NEW GAME  →</Text>
+            <View style={styles.modeTop}>
+              <Text style={styles.modeName}>Retail</Text>
+              <Text style={styles.modeKorean}>개미</Text>
+            </View>
+            <View style={styles.modeMeta}>
+              <View style={styles.modeStatRow}>
+                <Feather name="calendar" size={12} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.modeStatText}>{MODE_CONFIG.retail.totalDays}일</Text>
+              </View>
+              <View style={styles.modeStatRow}>
+                <Feather name="target" size={12} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.modeStatText}>${(MODE_CONFIG.retail.winGoal / 1000).toFixed(0)}K 목표</Text>
+              </View>
+            </View>
+          </LinearGradient>
+        </Pressable>
+
+        {/* Cartel (세력) */}
+        <Pressable
+          style={({ pressed }) => [styles.modeButton, pressed && styles.buttonPressed]}
+          onPress={() => handleStart('cartel')}
+        >
+          <LinearGradient
+            colors={['#7C3AED', '#4338CA']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.modeGradient}
+          >
+            <View style={styles.modeTop}>
+              <Text style={styles.modeName}>Cartel</Text>
+              <Text style={styles.modeKorean}>세력</Text>
+            </View>
+            <View style={styles.modeMeta}>
+              <View style={styles.modeStatRow}>
+                <Feather name="calendar" size={12} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.modeStatText}>{MODE_CONFIG.cartel.totalDays}일</Text>
+              </View>
+              <View style={styles.modeStatRow}>
+                <Feather name="target" size={12} color="rgba(255,255,255,0.8)" />
+                <Text style={styles.modeStatText}>${(MODE_CONFIG.cartel.winGoal / 1000).toFixed(0)}K 목표</Text>
+              </View>
+            </View>
           </LinearGradient>
         </Pressable>
 
@@ -55,16 +92,6 @@ export default function TitleScreen() {
           * 이 게임은 불법 주식 거래를 조장하지 않습니다.
         </Text>
       </View>
-    </View>
-  );
-}
-
-function StatCard({ icon, value, label }: { icon: React.ComponentProps<typeof Feather>['name']; value: string; label: string }) {
-  return (
-    <View style={styles.statCard}>
-      <Feather name={icon} size={16} color="#059669" />
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -111,87 +138,69 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 36,
-    gap: 16,
+    gap: 12,
     justifyContent: 'flex-end',
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 16,
-    alignItems: 'center',
-    gap: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  statValue: {
-    color: '#1A202C',
-    fontSize: 18,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
-  statLabel: {
+  modeLabel: {
     color: '#718096',
-    fontSize: 9,
-    letterSpacing: 2,
+    fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 4,
   },
-  hintCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  hintText: {
-    color: '#1A202C',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  startButton: {
+  modeButton: {
     borderRadius: 20,
     overflow: 'hidden',
-    shadowColor: '#F59E0B',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
   },
-  startGradient: {
-    paddingVertical: 18,
+  modeGradient: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  modeTop: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+    marginBottom: 10,
+  },
+  modeName: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+  },
+  modeKorean: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modeMeta: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  modeStatRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 5,
+  },
+  modeStatText: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 12,
+    fontWeight: '600',
   },
   buttonPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
   },
-  startButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 4,
-  },
   disclaimer: {
     color: '#A0AEC0',
     fontSize: 11,
     textAlign: 'center',
+    marginTop: 4,
   },
 });

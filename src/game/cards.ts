@@ -90,7 +90,7 @@ export const CARDS: Record<CardId, Card> = {
     description: '세력을 동원해 다음 턴 주가를 강제로 끌어올린다.',
     rarity: 'rare',
     effect: {
-      priceMultiplier: { min: 0.00, max: 0.10 },
+      priceMultiplier: { min: 0.05, max: 0.15 },
     },
     requiresCash: false,
     requiresShares: false,
