@@ -50,7 +50,7 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
           const fanOffset = i - (count - 1) / 2;
           const rotate = fanOffset * 6;
           // 부채꼴: 가운데가 가장 높고, 양쪽으로 갈수록 아래
-          const arcDrop = 24 + Math.abs(fanOffset) * 8 + (fanOffset === 0 ? 6 : 0);
+          const arcDrop = -8 + Math.abs(fanOffset) * 6 + (fanOffset === 0 ? 4 : 0);
           const x = startX + i * overlap;
           const isSelected = selected === i;
           const isDisabled = isMarketClosed ||
@@ -108,7 +108,7 @@ function FanCard({
 
   useEffect(() => {
     // 선택하면 위로 올라오고 회전 0, 미선택이면 부채꼴 위치로
-    translateY.value = withSpring(isSelected ? arcDrop - 24 : arcDrop, SPRING);
+    translateY.value = withSpring(isSelected ? arcDrop - 18 : arcDrop, SPRING);
     rotateVal.value = withSpring(isSelected ? 0 : rotate, SPRING);
     scaleVal.value = withSpring(isSelected ? 1.08 : 1, SPRING);
   }, [isSelected]);
@@ -131,6 +131,11 @@ function FanCard({
           width: CARD_W,
           height: CARD_H,
           zIndex,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: isSelected ? 8 : 4 },
+          shadowOpacity: isSelected ? 0.22 : 0.12,
+          shadowRadius: isSelected ? 12 : 6,
+          elevation: isSelected ? 10 : 4,
         },
         animStyle,
       ]}

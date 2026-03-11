@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Alert, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, TOTAL_DAYS } from '../src/store/gameStore';
 import StockChart from '../src/components/StockChart';
 import PortfolioCard from '../src/components/PortfolioCard';
@@ -16,7 +17,7 @@ export default function GameScreen() {
   const state = useGameStore();
   const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending } = state;
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   // 시장 시간: 96틱 = 8:00~16:00 (1틱 = 5분)
   const MARKET_TICKS = 96;
@@ -116,8 +117,8 @@ export default function GameScreen() {
   }, [priceHistory]);
 
   const theme = isDark
-    ? { bg: '#0d1117', cardBg: '#13171f', border: '#1e2533', text: '#FFFFFF', muted: '#8896a7' }
-    : { bg: '#f0f4f8', cardBg: '#ffffff', border: '#d1d9e0', text: '#0d1117', muted: '#718096' };
+    ? { bg: '#0d1117', cardBg: '#1a2030', border: '#2e3f5c', text: '#FFFFFF', muted: '#8896a7' }
+    : { bg: '#F8FAFC', cardBg: '#FFFFFF', border: '#E2E8F0', text: '#1A202C', muted: '#718096' };
 
   // 시장 시각 계산 (8:00 ~ 16:00)
   const marketMinutes = (marketTick / (MARKET_TICKS - 1)) * 480;
@@ -132,15 +133,15 @@ export default function GameScreen() {
   return (
     <Pressable style={[styles.container, { backgroundColor: theme.bg }]} onPress={() => setSelectedCard(null)}>
       {/* 헤더 */}
-      <View style={styles.header}>
-        <Text style={[styles.gameTitle, { color: theme.text }]}>Broker Rogue</Text>
-        <View style={[styles.dayBadge, { backgroundColor: isDark ? '#1a1f2b' : '#e8edf2', borderColor: theme.border }]}>
+      <LinearGradient colors={isDark ? ['#064e3b', '#1e3a8a'] : ['#059669', '#2563EB']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+        <Text style={styles.gameTitle}>Broker Rogue</Text>
+        <View style={styles.dayBadge}>
           <View style={[styles.dayDot, { backgroundColor: accent }]} />
-          <Text style={[styles.dayText, { color: theme.text }]}>Day {day}/{TOTAL_DAYS}</Text>
+          <Text style={styles.dayText}>Day {day}/{TOTAL_DAYS}</Text>
         </View>
         <View style={styles.headerIcons}>
           <Pressable onPress={() => setIsDark(d => !d)}>
-            <Feather name={isDark ? 'sun' : 'moon'} size={17} color={theme.muted} />
+            <Feather name={isDark ? 'sun' : 'moon'} size={17} color="#94A3B8" />
           </Pressable>
           <Pressable style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }} onPress={() => {
             Alert.alert(
@@ -152,10 +153,10 @@ export default function GameScreen() {
               ]
             );
           }}>
-            <Feather name="refresh-cw" size={17} color={theme.muted} />
+            <Feather name="refresh-cw" size={17} color="#94A3B8" />
           </Pressable>
         </View>
-      </View>
+      </LinearGradient>
 
       {/* 차트 */}
       <View style={[styles.chartCard, { backgroundColor: theme.cardBg, borderColor: theme.border }]}>
@@ -214,61 +215,76 @@ export default function GameScreen() {
           }
         }}
       >
-        <Text style={styles.nextDayText}>NEXT DAY  →</Text>
+        <LinearGradient colors={isDark ? ['#d97706', '#c2410c'] : ['#F59E0B', '#EA580C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextDayGradient}>
+          <Text style={styles.nextDayText}>NEXT DAY  →</Text>
+        </LinearGradient>
       </Pressable>
     </Pressable>
   );
 }
 
-const BG = '#0d1117';
-const CARD_BG = '#13171f';
-const BORDER = '#1e2533';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BG,
-    paddingTop: 52,
+    paddingTop: 0,
     paddingHorizontal: 16,
     paddingBottom: 20,
-    gap: 8,
+    gap: 10,
   },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: -16,
+    paddingHorizontal: 16,
+    paddingTop: 56,
+    paddingBottom: 14,
+  },
   gameTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', letterSpacing: -0.5 },
   roundLabel: { fontSize: 11, fontWeight: '600', marginTop: 1 },
   dayBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: '#1a1f2b', borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 20,
     paddingHorizontal: 12, paddingVertical: 5,
-    borderWidth: 1, borderColor: BORDER,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
   },
   dayDot: { width: 6, height: 6, borderRadius: 3 },
   dayText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
   headerIcons: { flexDirection: 'row', gap: 12, alignItems: 'center' },
 
   chartCard: {
-    backgroundColor: CARD_BG, borderRadius: 12,
-    borderWidth: 1, borderColor: BORDER,
-    padding: 12, gap: 4, overflow: 'hidden',
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 12, gap: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   chartRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   tickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  ticker: { color: '#FFFFFF', fontSize: 13, fontWeight: '800', letterSpacing: 1 },
-  pill: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  ticker: { fontSize: 13, fontWeight: '800', letterSpacing: 1 },
+  pill: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   pillText: { fontSize: 10, fontWeight: '700' },
   priceRight: { alignItems: 'flex-end' },
   price: { fontSize: 20, fontWeight: '900', letterSpacing: -1 },
-  openLabel: { color: '#4a5568', fontSize: 9, letterSpacing: 1 },
-  timeLabel: { color: '#4a5568', fontSize: 9, letterSpacing: 1, textAlign: 'right' },
+  openLabel: { fontSize: 9, letterSpacing: 1 },
+  timeLabel: { fontSize: 9, letterSpacing: 1, textAlign: 'right' },
 
   cardsHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  cardsLabel: { color: '#4a5568', fontSize: 10, letterSpacing: 3, fontWeight: '700' },
-  cardsCount: { color: '#00d97e', fontSize: 10 },
+  cardsLabel: { fontSize: 10, letterSpacing: 3, fontWeight: '700' },
+  cardsCount: { color: '#10B981', fontSize: 10, fontWeight: '700' },
 
   nextDayBtn: {
-    backgroundColor: '#00d97e', paddingVertical: 13,
-    borderRadius: 10, alignItems: 'center',
+    borderRadius: 20, overflow: 'hidden',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  nextDayGradient: {
+    paddingVertical: 15, alignItems: 'center',
   },
   btnPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
-  nextDayText: { color: '#000000', fontSize: 13, fontWeight: '900', letterSpacing: 4 },
+  nextDayText: { color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 4 },
 });

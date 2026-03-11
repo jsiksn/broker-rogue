@@ -61,7 +61,7 @@ export default function StockChart({ prices, width, height, isDark = true }: Pro
         <Path
           key={ratio}
           d={`M${padH},${(padV + chartH * ratio).toFixed(1)} L${(padH + chartW).toFixed(1)},${(padV + chartH * ratio).toFixed(1)}`}
-          stroke={isDark ? '#1e2533' : '#e2e8f0'}
+          stroke={isDark ? '#2e3f5c' : '#e2e8f0'}
           strokeWidth="1"
         />
       ))}
