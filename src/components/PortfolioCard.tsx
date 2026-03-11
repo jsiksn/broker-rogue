@@ -41,7 +41,7 @@ export default function PortfolioCard({
 
   return (
     <View style={styles.container}>
-      {/* 메인: Total Value + GAIN 한 줄 */}
+      {/* 메인: Total Value */}
       <LinearGradient
         colors={gradientColors}
         start={{ x: 0, y: 0 }}
@@ -49,12 +49,10 @@ export default function PortfolioCard({
         style={[styles.mainCard, { borderColor: border }]}
       >
         <View style={styles.row}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.totalLabel, { color: textMuted }]}>Total Value</Text>
+          <Text style={[styles.totalLabel, { color: textMuted }]}>Total Value</Text>
+          <View style={styles.totalRight}>
             <Text style={[styles.totalValue, { color: textPrimary }]}>{formatPrice(totalAssets)}</Text>
-          </View>
-          <View style={[styles.gainBadge, { borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-            <Text style={[styles.gainText, { color: gainColor }]}>
+            <Text style={[styles.totalChange, { color: gainColor }]}>
               {isPositive ? '+' : ''}{formatPrice(totalReturn)} ({formatPercent(totalReturnRate)})
             </Text>
           </View>
@@ -140,15 +138,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  totalLabel: { fontSize: 10, marginBottom: 2, letterSpacing: 0.5 },
-  totalValue: { fontSize: 22, fontWeight: '900', letterSpacing: -1 },
-  gainBadge: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  gainText: { fontSize: 12, fontWeight: '700' },
+  totalLabel: { fontSize: 13, fontWeight: '800', letterSpacing: 1 },
+  totalRight: { alignItems: 'flex-end' },
+  totalValue: { fontSize: 20, fontWeight: '900', letterSpacing: -1 },
+  totalChange: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   progressBar: {
     height: 4,
     borderRadius: 2,

@@ -133,11 +133,12 @@ export const CARDS: Record<CardId, Card> = {
 // 초기 덱 (기본 카드만)
 export const INITIAL_DECK: CardId[] = [
   'buy', 'buy', 'buy',
-  'partial_buy', 'partial_buy',
+  'partial_buy', 'partial_buy', 'partial_buy',
   'sell', 'sell', 'sell',
-  'partial_sell', 'partial_sell',
-  'average_down',
+  'partial_sell', 'partial_sell', 'partial_sell',
+  'average_down', 'average_down',
   'pump', 'pump',
+  'fake_news', 'fake_news',
 ];
 
 // 손패 크기

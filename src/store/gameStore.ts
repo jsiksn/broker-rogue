@@ -93,6 +93,32 @@ function drawHand(deck: CardId[]): { hand: CardId[]; remaining: CardId[] } {
   return { hand, remaining };
 }
 
+// 드로우 시 매수/매도 각 1장 이상 보장 (총 count장 유지)
+function guaranteedDraw(pool: CardId[], existingHand: CardId[], count: number): { drawn: CardId[]; remaining: CardId[] } {
+  const buyTypes: CardId[] = ['buy', 'partial_buy'];
+  const sellTypes: CardId[] = ['sell', 'partial_sell'];
+  const poolCopy = [...pool];
+  const drawn: CardId[] = [];
+  let remaining = count;
+
+  const forceOne = (types: CardId[], alreadyDrawn: CardId[]) => {
+    if (remaining <= 0) return;
+    if (existingHand.some(c => types.includes(c))) return;
+    if (alreadyDrawn.some(c => types.includes(c))) return;
+    const idx = poolCopy.findIndex(c => types.includes(c));
+    if (idx === -1) return;
+    drawn.push(poolCopy[idx]);
+    poolCopy.splice(idx, 1);
+    remaining--;
+  };
+
+  forceOne(buyTypes, drawn);
+  forceOne(sellTypes, drawn);
+
+  const { drawn: rest, remaining: finalPool } = weightedDraw(poolCopy, [...existingHand, ...drawn], remaining);
+  return { drawn: [...drawn, ...rest], remaining: finalPool };
+}
+
 // 다양성 가중 뽑기: 손패에 없는 카드 종류를 3배 높은 확률로 뽑음
 function weightedDraw(pool: CardId[], existingHand: CardId[], count: number): { drawn: CardId[]; remaining: CardId[] } {
   const poolCopy = [...pool];
@@ -145,25 +171,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   mode: 'cartel' as GameMode,
 
   startGame: (mode: GameMode) => {
-    const { hand: rawHand, remaining: rawRemaining } = drawHand([...INITIAL_DECK]);
-    const buyTypes: CardId[] = ['buy', 'partial_buy'];
-    let hand = [...rawHand];
-    let remaining = [...rawRemaining];
-
-    // 첫 손패에 매수 카드 2장 이상 보장
-    const buyInHand = hand.filter(c => buyTypes.includes(c)).length;
-    if (buyInHand < 2) {
-      const needed = 2 - buyInHand;
-      for (let i = 0; i < needed; i++) {
-        const deckBuyIdx = remaining.findIndex(c => buyTypes.includes(c));
-        if (deckBuyIdx === -1) break;
-        const handNonBuyIdx = hand.findIndex(c => !buyTypes.includes(c));
-        if (handNonBuyIdx === -1) break;
-        remaining.push(hand[handNonBuyIdx]);
-        hand[handNonBuyIdx] = remaining[deckBuyIdx];
-        remaining.splice(deckBuyIdx, 1);
-      }
-    }
+    const { drawn: hand, remaining } = guaranteedDraw([...INITIAL_DECK], [], HAND_SIZE);
 
     set({
       mode,
@@ -297,11 +305,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const state = get();
     if (state.status !== 'playing') return;
 
-    const effectiveVolatility = state.volatility * state.pending.volatilityMultiplier;
-    const nextPrice = calcNextPrice(
-      state.currentPrice,
-      effectiveVolatility,
-    );
+    const nextPrice = state.currentPrice;
 
     const newCash = state.cash;
 
@@ -315,14 +319,14 @@ export const useGameStore = create<GameState>((set, get) => ({
     let newStatus: GameStatus = 'playing';
     if (totalAssets >= winGoal) {
       newStatus = 'win';
-    } else if (totalAssets < 100 || (isLastDay && totalAssets < winGoal)) {
+    } else if (totalAssets < 10 || (isLastDay && totalAssets < winGoal)) {
       newStatus = 'lose';
     }
 
     // 남은 손패 유지 + 사용한 카드 덱에 반환 후 빈 자리만 다양성 가중 뽑기로 채우기
     const drawPool = [...state.deck, ...state.playedCards];
     const drawCount = HAND_SIZE - state.hand.length;
-    const { drawn: newCards, remaining: newDeck } = weightedDraw(drawPool, state.hand, drawCount);
+    const { drawn: newCards, remaining: newDeck } = guaranteedDraw(drawPool, state.hand, drawCount);
     const newHand = [...state.hand, ...newCards];
 
     set({
@@ -338,7 +342,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       deck: newDeck,
       peakAssets: newPeak,
       nextPriceDirection: null,
-      volatility: BASE_VOLATILITY,
+      volatility: BASE_VOLATILITY * state.pending.volatilityMultiplier,
     });
   },
 

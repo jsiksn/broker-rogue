@@ -38,7 +38,7 @@ export default function TitleScreen() {
           onPress={() => handleStart('retail')}
         >
           <LinearGradient
-            colors={['#059669', '#0284C7']}
+            colors={['#F59E0B', '#EA580C']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.modeGradient}

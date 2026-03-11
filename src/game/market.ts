@@ -1,6 +1,6 @@
 export const BASE_VOLATILITY = 0.06;
 export const PRICE_BIAS = 0.015; // 매일 +1.5% 상승 편향
-export const INITIAL_PRICE = 10000; // 주당 1만원으로 시작
+export const INITIAL_PRICE = 100; // 주당 $100으로 시작
 
 export type PriceDirection = 'up' | 'down' | 'flat';
 
@@ -13,7 +13,7 @@ export function calcNextPrice(
   const random = Math.random() * 2 - 1; // -1 ~ +1
   const change = volatility * random + PRICE_BIAS + forcedDelta;
   const nextPrice = currentPrice * (1 + change);
-  return Math.max(nextPrice, 100); // 최소 100원 (완전 0 방지)
+  return Math.max(nextPrice, 1); // 최소 $1 (완전 0 방지)
 }
 
 // 다음 턴 가격 방향 미리 계산 (내부자 정보 카드용)

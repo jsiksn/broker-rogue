@@ -15,7 +15,7 @@ export default function GameScreen() {
   const initialized = useRef(false);
 
   const state = useGameStore();
-  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending, mode } = state;
+  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending, mode, volatility } = state;
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [isDark, setIsDark] = useState(false);
 
@@ -28,6 +28,8 @@ export default function GameScreen() {
   const marketTickRef = useRef(0);
   const appliedDeltaRef = useRef(0);
   const pumpAnimRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const volatilityRef = useRef(volatility);
+  useEffect(() => { volatilityRef.current = volatility; }, [volatility]);
 
   useEffect(() => {
     if (!initialized.current) { initialized.current = true; if (status !== 'playing') startGame('cartel'); }
@@ -49,7 +51,7 @@ export default function GameScreen() {
     setMarketTick(0);
   }, [priceHistory]);
 
-  // 카드 효과: pump 5초 우상향 후 원가 복귀
+  // 카드 효과: pump 3~8초 우상향 후 원가 복귀
   useEffect(() => {
     const newDelta = pending.forcedDelta - appliedDeltaRef.current;
     if (newDelta === 0) return;
@@ -59,10 +61,9 @@ export default function GameScreen() {
     const basePrice = livePricesRef.current[tick];
 
     {
-      // pump: 5초 우상향 후 원가 복귀
       if (pumpAnimRef.current) clearInterval(pumpAnimRef.current);
       const peakPrice = Math.max(basePrice * (1 + newDelta), 100);
-      const riseMs = 5000;
+      const riseMs = 3000 + Math.random() * 5000;
       const fallMs = Math.random() * 5000;
       const stepMs = 50;
       let riseElapsed = 0;
@@ -103,8 +104,10 @@ export default function GameScreen() {
       if (prev >= MARKET_TICKS - 1) return;
       const next = prev + 1;
       const last = livePricesRef.current[prev];
-      const noise = last * (Math.random() * 0.04 - 0.02);
-      const newPrice = Math.max(last + noise, 100);
+      const tickAmp = volatilityRef.current / 3;
+      const tickBias = 0.015 / MARKET_TICKS;
+      const noise = last * (Math.random() * 2 * tickAmp - tickAmp + tickBias);
+      const newPrice = Math.max(last + noise, 1);
       const newPrices = [...livePricesRef.current];
       for (let i = next; i < MARKET_TICKS; i++) newPrices[i] = newPrice;
       livePricesRef.current = newPrices;
@@ -162,7 +165,10 @@ export default function GameScreen() {
       <View style={[styles.chartCard, { backgroundColor: theme.cardBg, borderColor: theme.border }]}>
         <View style={styles.chartRow}>
           <View style={styles.tickerRow}>
-            <Text style={[styles.ticker, { color: theme.text }]}>BRKR</Text>
+            <View>
+              <Text style={[styles.ticker, { color: theme.text }]}>BRKR</Text>
+              <Text style={[styles.timeLabel, { color: theme.muted }]}>{currentTime}</Text>
+            </View>
             <View style={[styles.pill, { backgroundColor: accent + '22' }]}>
               <Text style={[styles.pillText, { color: accent }]}>
                 {isUp ? '▲' : '▼'} {formatPercent(dayChangeRate)}
@@ -170,12 +176,15 @@ export default function GameScreen() {
             </View>
           </View>
           <View style={styles.priceRight}>
-            <Text style={[styles.price, { color: accent }]}>{formatPrice(currentPrice)}</Text>
-            <Text style={[styles.openLabel, { color: theme.muted }]}>OPEN {formatPrice(todayOpen)}</Text>
+            <Text style={[styles.price, { color: accent }]}>{isUp ? '▲' : '▼'} {formatPrice(currentPrice)}</Text>
+            <Text style={[styles.openLabel, { color: accent }]}>
+              {isUp ? '+' : ''}{formatPrice(currentPrice - todayOpen)} ({formatPercent(dayChangeRate)})
+            </Text>
           </View>
         </View>
+        <View style={[styles.chartDivider, { borderColor: theme.border }]} />
         <StockChart prices={livePrices} width={width - 48} height={70} isDark={isDark} />
-        <Text style={[styles.timeLabel, { color: theme.muted }]}>{currentTime}</Text>
+        <View style={[styles.chartDivider, { borderColor: theme.border }]} />
       </View>
 
       {/* 포트폴리오 */}
@@ -261,15 +270,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  chartRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  tickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  chartRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  tickerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   ticker: { fontSize: 13, fontWeight: '800', letterSpacing: 1 },
-  pill: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  pill: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 2 },
   pillText: { fontSize: 10, fontWeight: '700' },
   priceRight: { alignItems: 'flex-end' },
   price: { fontSize: 20, fontWeight: '900', letterSpacing: -1 },
-  openLabel: { fontSize: 9, letterSpacing: 1 },
-  timeLabel: { fontSize: 9, letterSpacing: 1, textAlign: 'right' },
+  openLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  timeLabel: { fontSize: 9, letterSpacing: 1 },
+  chartDivider: { borderBottomWidth: 1 },
 
   cardsHeader: { flexDirection: 'row', justifyContent: 'space-between' },
   cardsLabel: { fontSize: 10, letterSpacing: 3, fontWeight: '700' },

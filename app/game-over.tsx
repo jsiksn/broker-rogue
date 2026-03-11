@@ -12,6 +12,7 @@ export default function GameOverScreen() {
   const totalAssets = cash + shares * currentPrice;
   const totalReturn = (totalAssets - INITIAL_CASH) / INITIAL_CASH;
   const isWin = status === 'win';
+  const isBankrupt = !isWin && totalAssets < 10;
 
   const gradientColors: [string, string] = isWin
     ? ['#059669', '#2563EB']
@@ -29,7 +30,7 @@ export default function GameOverScreen() {
         <Text style={styles.statusLabel}>
           {isWin ? 'VICTORY' : 'GAME OVER'}
         </Text>
-        <Text style={styles.result}>{isWin ? '목표 달성' : '파산'}</Text>
+        <Text style={styles.result}>{isWin ? '목표 달성' : isBankrupt ? '파산' : '목표 미달'}</Text>
         <Text style={styles.subtitle}>
           {isWin
             ? `${day - 1}일 만에 목표 달성!`
