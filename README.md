@@ -1,50 +1,118 @@
-# Welcome to your Expo app 👋
+# Broker Rogue
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> 합법과 불법을 넘나드는 20일 주식 생존기
+> A 20-day rogue-lite stock trading survival game
 
-## Get started
+---
 
-1. Install dependencies
+## Overview
 
-   ```bash
-   npm install
-   ```
+$10,000으로 시작해 20일 안에 $100,000을 만드세요.
+매일 주어지는 트레이딩 카드를 사용해 시장을 유리하게 이끌고, 목표 자산에 도달하면 승리합니다.
 
-2. Start the app
+Start with **$10,000** and reach **$100,000** within **20 days**.
+Use trading cards each day to influence the market and maximize your portfolio.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Gameplay
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| 항목 | 내용 |
+|------|------|
+| 시작 자산 | $10,000 |
+| 목표 자산 | $100,000 |
+| 게임 기간 | 20일 |
+| 손패 크기 | 5장 |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+매일 장이 열리면 실시간으로 주가가 움직입니다 (08:00 ~ 16:00).
+손패에서 카드를 한 장 플레이한 뒤 NEXT DAY를 눌러 다음 날로 넘어갑니다.
 
-## Get a fresh project
+Each day, the market runs in real time (08:00–16:00).
+Play one card from your hand, then advance to the next day.
 
-When you're ready, run:
+---
+
+## Cards
+
+### Common ★
+| 카드 | 효과 |
+|------|------|
+| 매수 | 보유 현금 전량으로 주식 매수 |
+| 분할 매수 | 보유 현금의 50%로 주식 매수 |
+| 매도 | 보유 주식 전량 매도 |
+| 분할 매도 | 보유 주식의 50% 매도 |
+
+### Rare ★★
+| 카드 | 효과 |
+|------|------|
+| 물타기 | P&L 마이너스 상태에서만 사용 가능. 현금 전량으로 10% 효율 추가 매수 |
+| 작전 | 세력 동원 — 주가를 일시적으로 최대 +10% 끌어올림 |
+| 가짜뉴스 | 다음 턴 변동성 2.5배 폭발 |
+
+### Legendary ★★★
+| 카드 | 효과 |
+|------|------|
+| 내부자 정보 | 다음 날 주가 등락 방향을 미리 확인 |
+| 레버리지 | 현금의 2배 규모로 매수. 손익도 2배 |
+
+---
+
+## Tech Stack
+
+- **Framework**: React Native + Expo (SDK 54)
+- **Routing**: Expo Router
+- **State**: Zustand
+- **Animation**: React Native Reanimated
+- **Chart**: react-native-svg
+- **UI**: expo-linear-gradient, @expo/vector-icons (Feather)
+- **Language**: TypeScript
+
+---
+
+## Getting Started
 
 ```bash
-npm run reset-project
+# 의존성 설치 / Install dependencies
+npm install
+
+# 개발 서버 실행 / Start dev server
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+iOS 시뮬레이터, Android 에뮬레이터, 또는 Expo Go 앱으로 실행할 수 있습니다.
+Run on iOS Simulator, Android Emulator, or the Expo Go app.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+app/
+  index.tsx        # 타이틀 화면 / Title screen
+  game.tsx         # 메인 게임 화면 / Main game screen
+  game-over.tsx    # 게임 오버 화면 / Game over screen
 
-## Join the community
+src/
+  components/
+    StockChart.tsx     # 실시간 주가 차트
+    PortfolioCard.tsx  # 자산 현황 카드
+    CardFan.tsx        # 카드 부채꼴 UI
+    TradingCard.tsx    # 개별 트레이딩 카드
+  game/
+    cards.ts       # 카드 정의 및 덱
+    market.ts      # 주가 계산 로직
+    engine.ts      # 게임 엔진
+  store/
+    gameStore.ts   # Zustand 전역 상태
+```
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Win / Lose Conditions
+
+- **WIN** 🏆 — 총 자산이 $100,000 이상
+- **LOSE** 💀 — 총 자산이 $100 미만, 또는 20일 종료 시 목표 미달
+
+---
+
+*이 게임은 불법 주식 거래를 조장하지 않습니다.*
