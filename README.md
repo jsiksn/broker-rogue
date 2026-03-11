@@ -1,7 +1,10 @@
 # Broker Rogue
 
 > 합법과 불법을 넘나드는 20일 주식 생존기
+
 > A 20-day rogue-lite stock trading survival game
+
+![demo](assets/demo.gif)
 
 ---
 
@@ -72,14 +75,23 @@ Play one card from your hand, then advance to the next day.
 ## Getting Started
 
 ```bash
-# 의존성 설치 / Install dependencies
+# 의존성 설치
 npm install
 
-# 개발 서버 실행 / Start dev server
+# 개발 서버 실행
+npx expo start
+```
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
 npx expo start
 ```
 
 iOS 시뮬레이터, Android 에뮬레이터, 또는 Expo Go 앱으로 실행할 수 있습니다.
+
 Run on iOS Simulator, Android Emulator, or the Expo Go app.
 
 ---
@@ -88,9 +100,9 @@ Run on iOS Simulator, Android Emulator, or the Expo Go app.
 
 ```
 app/
-  index.tsx        # 타이틀 화면 / Title screen
-  game.tsx         # 메인 게임 화면 / Main game screen
-  game-over.tsx    # 게임 오버 화면 / Game over screen
+  index.tsx        # 타이틀 화면
+  game.tsx         # 메인 게임 화면
+  game-over.tsx    # 게임 오버 화면
 
 src/
   components/
@@ -106,12 +118,35 @@ src/
     gameStore.ts   # Zustand 전역 상태
 ```
 
+```
+app/
+  index.tsx        # Title screen
+  game.tsx         # Main game screen
+  game-over.tsx    # Game over screen
+
+src/
+  components/
+    StockChart.tsx     # Real-time stock chart
+    PortfolioCard.tsx  # Portfolio summary card
+    CardFan.tsx        # Card fan UI
+    TradingCard.tsx    # Individual trading card
+  game/
+    cards.ts       # Card definitions & deck
+    market.ts      # Price calculation logic
+    engine.ts      # Game engine
+  store/
+    gameStore.ts   # Zustand global state
+```
+
 ---
 
 ## Win / Lose Conditions
 
 - **WIN** 🏆 — 총 자산이 $100,000 이상
 - **LOSE** 💀 — 총 자산이 $100 미만, 또는 20일 종료 시 목표 미달
+
+- **WIN** 🏆 — Total assets reach $100,000
+- **LOSE** 💀 — Total assets drop below $100, or goal not reached by Day 20
 
 ---
 
