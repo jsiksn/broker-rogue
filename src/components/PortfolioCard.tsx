@@ -8,7 +8,6 @@ type Props = {
   shares: number;
   currentPrice: number;
   avgBuyPrice: number;
-  nextPriceDirection: 'up' | 'down' | null;
   isDark: boolean;
   winGoal: number;
 };
@@ -18,7 +17,6 @@ export default function PortfolioCard({
   shares,
   currentPrice,
   avgBuyPrice,
-  nextPriceDirection,
   isDark,
   winGoal,
 }: Props) {
@@ -49,7 +47,7 @@ export default function PortfolioCard({
         style={[styles.mainCard, { borderColor: border }]}
       >
         <View style={styles.row}>
-          <Text style={[styles.totalLabel, { color: textMuted }]}>Total Value</Text>
+          <Text style={[styles.totalLabel, { color: textMuted, marginTop: -10 }]}>Total Value</Text>
           <View style={styles.totalRight}>
             <Text style={[styles.totalValue, { color: textPrimary }]}>{formatPrice(totalAssets)}</Text>
             <Text style={[styles.totalChange, { color: gainColor }]}>
@@ -72,36 +70,26 @@ export default function PortfolioCard({
           subColor={isDark ? '#8896a7' : '#718096'}
           bg={statBg} border={isDark ? '#2e3f5c' : '#E2E8F0'} textPrimary={isDark ? '#FFFFFF' : '#1A202C'} textMuted={isDark ? '#8896a7' : '#718096'}
         />
-        {shares > 0 && avgBuyPrice > 0 ? (
-          <StatBox
-            label="Avg Buy"
-            value={formatPrice(avgBuyPrice)}
-            bg={statBg} border={isDark ? '#2e3f5c' : '#E2E8F0'} textPrimary={isDark ? '#FFFFFF' : '#1A202C'} textMuted={isDark ? '#8896a7' : '#718096'}
-          />
-        ) : null}
-        {shares > 0 && avgBuyPrice > 0 ? (() => {
-          const pnl = sharesValue - shares * avgBuyPrice;
-          const pnlRate = (currentPrice - avgBuyPrice) / avgBuyPrice;
-          const color = pnl >= 0 ? '#059669' : '#DC2626';
+        <StatBox
+          label="Avg Buy"
+          value={avgBuyPrice > 0 ? formatPrice(avgBuyPrice) : '—'}
+          bg={statBg} border={isDark ? '#2e3f5c' : '#E2E8F0'} textPrimary={isDark ? '#FFFFFF' : '#1A202C'} textMuted={isDark ? '#8896a7' : '#718096'}
+        />
+        {(() => {
+          const pnl = shares > 0 && avgBuyPrice > 0 ? sharesValue - shares * avgBuyPrice : 0;
+          const pnlRate = shares > 0 && avgBuyPrice > 0 ? (currentPrice - avgBuyPrice) / avgBuyPrice : 0;
+          const color = pnl > 0 ? '#059669' : pnl < 0 ? '#DC2626' : (isDark ? '#8896a7' : '#718096');
           return (
             <StatBox
               label="P&L"
-              value={`${pnl >= 0 ? '+' : ''}${formatPrice(pnl)}`}
-              sub={formatPercent(pnlRate)}
+              value={shares > 0 && avgBuyPrice > 0 ? `${pnl >= 0 ? '+' : ''}${formatPrice(pnl)}` : '—'}
+              sub={shares > 0 && avgBuyPrice > 0 ? formatPercent(pnlRate) : undefined}
               valueColor={color}
               subColor={color}
               bg={statBg} border={isDark ? '#2e3f5c' : '#E2E8F0'} textPrimary={isDark ? '#FFFFFF' : '#1A202C'} textMuted={isDark ? '#8896a7' : '#718096'}
             />
           );
-        })() : null}
-        {nextPriceDirection ? (
-          <StatBox
-            label="Signal"
-            value={nextPriceDirection === 'up' ? '▲' : '▼'}
-            valueColor={nextPriceDirection === 'up' ? '#059669' : '#DC2626'}
-            bg={statBg} border={isDark ? '#2e3f5c' : '#E2E8F0'} textPrimary={isDark ? '#FFFFFF' : '#1A202C'} textMuted={isDark ? '#8896a7' : '#718096'}
-          />
-        ) : null}
+        })()}
       </View>
     </View>
   );

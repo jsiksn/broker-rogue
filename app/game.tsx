@@ -15,7 +15,7 @@ export default function GameScreen() {
   const initialized = useRef(false);
 
   const state = useGameStore();
-  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending, mode, volatility } = state;
+  const { startGame, playCard, endTurn, setCurrentPrice, status, day, cash, shares, currentPrice, priceHistory, hand, nextPriceDirection, pending, mode, volatility, priceBias } = state;
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [isDark, setIsDark] = useState(false);
 
@@ -30,6 +30,8 @@ export default function GameScreen() {
   const pumpAnimRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const volatilityRef = useRef(volatility);
   useEffect(() => { volatilityRef.current = volatility; }, [volatility]);
+  const priceBiasRef = useRef(priceBias);
+  useEffect(() => { priceBiasRef.current = priceBias; }, [priceBias]);
 
   useEffect(() => {
     if (!initialized.current) { initialized.current = true; if (status !== 'playing') startGame('cartel'); }
@@ -105,7 +107,7 @@ export default function GameScreen() {
       const next = prev + 1;
       const last = livePricesRef.current[prev];
       const tickAmp = volatilityRef.current / 3;
-      const tickBias = 0.015 / MARKET_TICKS;
+      const tickBias = priceBiasRef.current / MARKET_TICKS;
       const noise = last * (Math.random() * 2 * tickAmp - tickAmp + tickBias);
       const newPrice = Math.max(last + noise, 1);
       const newPrices = [...livePricesRef.current];
@@ -182,9 +184,7 @@ export default function GameScreen() {
             </Text>
           </View>
         </View>
-        <View style={[styles.chartDivider, { borderColor: theme.border }]} />
         <StockChart prices={livePrices} width={width - 48} height={70} isDark={isDark} />
-        <View style={[styles.chartDivider, { borderColor: theme.border }]} />
       </View>
 
       {/* 포트폴리오 */}
@@ -193,7 +193,6 @@ export default function GameScreen() {
         shares={shares}
         currentPrice={currentPrice}
         avgBuyPrice={state.avgBuyPrice}
-        nextPriceDirection={nextPriceDirection}
         isDark={isDark}
         winGoal={MODE_CONFIG[mode].winGoal}
       />
@@ -203,7 +202,7 @@ export default function GameScreen() {
         <Text style={[styles.cardsLabel, { color: theme.muted }]}>TRADE CARDS</Text>
         <Text style={styles.cardsCount}>{hand.length} cards</Text>
       </View>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, marginTop: 8 }}>
         <CardFan hand={hand} onPlayCard={(i) => playCard(i, currentPrice)} selected={selectedCard} onSelect={setSelectedCard} cash={cash} shares={shares} avgBuyPrice={state.avgBuyPrice} currentPrice={currentPrice} isMarketClosed={marketTick >= MARKET_TICKS - 1} isDark={isDark} />
       </View>
 
@@ -225,8 +224,17 @@ export default function GameScreen() {
           }
         }}
       >
-        <LinearGradient colors={isDark ? ['#d97706', '#c2410c'] : ['#F59E0B', '#EA580C']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextDayGradient}>
-          <Text style={styles.nextDayText}>NEXT DAY  →</Text>
+        <LinearGradient
+          colors={
+            nextPriceDirection === 'up' ? ['#059669', '#10B981'] :
+            nextPriceDirection === 'down' ? ['#DC2626', '#EF4444'] :
+            isDark ? ['#d97706', '#c2410c'] : ['#F59E0B', '#EA580C']
+          }
+          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextDayGradient}
+        >
+          <Text style={styles.nextDayText}>
+            NEXT DAY{nextPriceDirection === 'up' ? '  ▲' : nextPriceDirection === 'down' ? '  ▼' : ''}
+          </Text>
         </LinearGradient>
       </Pressable>
     </Pressable>

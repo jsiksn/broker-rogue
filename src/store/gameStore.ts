@@ -21,10 +21,10 @@ export type GamePhase = 'draw' | 'play' | 'resolve' | 'upgrade';
 export type GameStatus = 'playing' | 'win' | 'lose';
 
 export type PendingEffect = {
-  forcedDelta: number;       // 다음 턴 주가에 가할 강제 변동
+  forcedDelta: number;          // 다음 턴 주가에 가할 강제 변동
   volatilityMultiplier: number; // 다음 턴 변동성 배수
-  revealDirection: boolean;  // 다음 턴 방향 공개 여부
-  leverageMultiplier: number; // 레버리지 배수
+  leverageMultiplier: number;   // 레버리지 배수
+  priceBias: number;            // 다음 턴 틱당 바이어스 (내부자 정보)
 };
 
 export type GameState = {
@@ -55,6 +55,7 @@ export type GameState = {
   // 통계
   peakAssets: number;
   nextPriceDirection: 'up' | 'down' | null; // 내부자 정보로 공개된 방향
+  priceBias: number; // 당일 틱당 바이어스
 
   // 모드
   mode: GameMode;
@@ -66,11 +67,13 @@ export type GameState = {
   setCurrentPrice: (price: number) => void;
 };
 
+export const BASE_PRICE_BIAS = 0.015;
+
 const DEFAULT_PENDING: PendingEffect = {
   forcedDelta: 0,
   volatilityMultiplier: 1,
-  revealDirection: false,
   leverageMultiplier: 1,
+  priceBias: BASE_PRICE_BIAS,
 };
 
 function isRareOrLegendary(c: CardId) {
@@ -168,6 +171,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   pending: { ...DEFAULT_PENDING },
   peakAssets: INITIAL_CASH,
   nextPriceDirection: null,
+  priceBias: BASE_PRICE_BIAS,
   mode: 'cartel' as GameMode,
 
   startGame: (mode: GameMode) => {
@@ -191,6 +195,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       pending: { ...DEFAULT_PENDING },
       peakAssets: INITIAL_CASH,
       nextPriceDirection: null,
+      priceBias: BASE_PRICE_BIAS,
     });
   },
 
@@ -209,6 +214,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     let newCash = state.cash;
     let newShares = state.shares;
     let newAvgBuyPrice = state.avgBuyPrice;
+    let nextDir = state.nextPriceDirection;
 
     switch (cardId) {
       case 'buy': {
@@ -269,7 +275,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       }
       case 'insider': {
-        newPending.revealDirection = true;
+        const dir: 'up' | 'down' = Math.random() < 0.5 ? 'up' : 'down';
+        newPending.priceBias = dir === 'up' ? 0.05 : -0.04;
+        nextDir = dir;
         break;
       }
       case 'leverage': {
@@ -282,12 +290,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         newPending.leverageMultiplier = card.effect.leverageMultiplier!;
         break;
       }
-    }
-
-    // 내부자 정보: 현재 pending 기준으로 방향 예측
-    let nextDir = state.nextPriceDirection;
-    if (newPending.revealDirection) {
-      nextDir = newPending.forcedDelta >= 0 ? 'up' : 'down';
     }
 
     set({
@@ -342,6 +344,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       deck: newDeck,
       peakAssets: newPeak,
       nextPriceDirection: null,
+      priceBias: state.pending.priceBias,
       volatility: BASE_VOLATILITY * state.pending.volatilityMultiplier,
     });
   },

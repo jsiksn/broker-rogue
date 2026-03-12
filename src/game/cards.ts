@@ -109,11 +109,9 @@ export const CARDS: Record<CardId, Card> = {
   insider: {
     id: 'insider',
     name: '내부자 정보',
-    description: '다음 턴 주가 등락 방향을 미리 확인한다.',
+    description: '다음 날 주가 방향을 입수해 그 방향으로 강한 바람을 만든다.',
     rarity: 'legendary',
-    effect: {
-      revealNextPrice: true,
-    },
+    effect: {},
     requiresCash: false,
     requiresShares: false,
   },
@@ -139,6 +137,7 @@ export const INITIAL_DECK: CardId[] = [
   'average_down', 'average_down',
   'pump', 'pump',
   'fake_news', 'fake_news',
+  'insider',
 ];
 
 // 손패 크기
