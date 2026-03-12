@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
     letterSpacing: -0.5,
+    fontFamily: 'Fredoka_700Bold',
   },
   subtitle: {
     fontSize: 8,

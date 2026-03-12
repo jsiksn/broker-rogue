@@ -114,10 +114,12 @@ const styles = StyleSheet.create({
     letterSpacing: -2,
     lineHeight: 52,
     marginBottom: 8,
+    fontFamily: 'Fredoka_700Bold',
   },
   subtitle: {
     color: 'rgba(255,255,255,0.8)',
     fontSize: 14,
+    fontFamily: 'Fredoka_700Bold',
   },
   body: {
     flex: 1,
@@ -157,6 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '900',
     letterSpacing: 4,
+    fontFamily: 'Fredoka_700Bold',
   },
   buttonPressed: {
     opacity: 0.85,
@@ -176,10 +179,12 @@ const statStyles = StyleSheet.create({
   label: {
     color: '#718096',
     fontSize: 13,
+    fontFamily: 'Fredoka_700Bold',
   },
   value: {
     color: '#1A202C',
     fontSize: 13,
     fontWeight: '700',
+    fontFamily: 'Fredoka_700Bold',
   },
 });
