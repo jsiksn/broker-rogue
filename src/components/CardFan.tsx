@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
+  runOnJS,
 } from 'react-native-reanimated';
 import { CardId, CARDS } from '../game/cards';
 import TradingCard from './TradingCard';
@@ -25,12 +27,15 @@ const CARD_W = 88;
 const CARD_H = 125;
 const SPRING = { damping: 16, stiffness: 180, mass: 0.7 };
 
+type PlayingCard = { cardId: CardId; x: number; y: number };
+
 export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, shares, avgBuyPrice, currentPrice, isMarketClosed, isDark }: Props) {
   const { width } = useWindowDimensions();
+  const [playingCard, setPlayingCard] = useState<PlayingCard | null>(null);
 
   useEffect(() => { onSelect(null); }, [hand]);
 
-  if (hand.length === 0) {
+  if (hand.length === 0 && !playingCard) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>카드 없음</Text>
@@ -39,8 +44,8 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
   }
 
   const count = hand.length;
-  const overlap = Math.min(50, (width - 32) / count);
-  const totalW = CARD_W + overlap * (count - 1);
+  const overlap = Math.min(50, (width - 32) / Math.max(count, 1));
+  const totalW = CARD_W + overlap * (Math.max(count, 1) - 1);
   const startX = (width - 32 - totalW) / 2;
 
   return (
@@ -49,7 +54,6 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
         {hand.map((cardId, i) => {
           const fanOffset = i - (count - 1) / 2;
           const rotate = fanOffset * 6;
-          // 부채꼴: 가운데가 가장 높고, 양쪽으로 갈수록 아래
           const arcDrop = -8 + Math.abs(fanOffset) * 6 + (fanOffset === 0 ? 4 : 0);
           const x = startX + i * overlap;
           const isSelected = selected === i;
@@ -74,6 +78,7 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
                 if (isDisabled) return;
                 if (isSelected) {
                   onPlayCard(i);
+                  setPlayingCard({ cardId, x, y: arcDrop - 18 });
                   onSelect(null);
                 } else {
                   onSelect(i);
@@ -82,6 +87,16 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
             />
           );
         })}
+
+        {playingCard && (
+          <PlayingCardOverlay
+            cardId={playingCard.cardId}
+            x={playingCard.x}
+            y={playingCard.y}
+            isDark={isDark}
+            onDone={() => setPlayingCard(null)}
+          />
+        )}
       </View>
 
       <Text style={[styles.hint, { color: isDark ? '#4a5568' : '#718096' }]}>
@@ -92,6 +107,33 @@ export default function CardFan({ hand, onPlayCard, selected, onSelect, cash, sh
           : '카드를 탭하세요'}
       </Text>
     </View>
+  );
+}
+
+function PlayingCardOverlay({ cardId, x, y, isDark, onDone }: {
+  cardId: CardId; x: number; y: number; isDark: boolean; onDone: () => void;
+}) {
+  const scale = useSharedValue(1.08);
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    scale.value = withTiming(1.6, { duration: 160 }, () => {
+      scale.value = withTiming(0, { duration: 220 });
+      opacity.value = withTiming(0, { duration: 220 }, () => {
+        runOnJS(onDone)();
+      });
+    });
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[{ position: 'absolute', left: x, top: y, width: CARD_W, height: CARD_H, zIndex: 200 }, animStyle]}>
+      <TradingCard card={CARDS[cardId]} onPress={() => {}} isTop isDark={isDark} />
+    </Animated.View>
   );
 }
 
@@ -107,7 +149,6 @@ function FanCard({
   const scaleVal = useSharedValue(1);
 
   useEffect(() => {
-    // 선택하면 위로 올라오고 회전 0, 미선택이면 부채꼴 위치로
     translateY.value = withSpring(isSelected ? arcDrop - 18 : arcDrop, SPRING);
     rotateVal.value = withSpring(isSelected ? 0 : rotate, SPRING);
     scaleVal.value = withSpring(isSelected ? 1.08 : 1, SPRING);
