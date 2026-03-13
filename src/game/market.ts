@@ -1,4 +1,4 @@
-export const BASE_VOLATILITY = 0.06;
+export const BASE_VOLATILITY = 0.3;
 export const PRICE_BIAS = 0.015; // 매일 +1.5% 상승 편향
 export const INITIAL_PRICE = 100; // 주당 $100으로 시작
 

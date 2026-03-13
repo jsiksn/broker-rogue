@@ -106,7 +106,7 @@ export default function GameScreen() {
       if (prev >= MARKET_TICKS - 1) return;
       const next = prev + 1;
       const last = livePricesRef.current[prev];
-      const tickAmp = volatilityRef.current / 3;
+      const tickAmp = volatilityRef.current / MARKET_TICKS;
       const tickBias = priceBiasRef.current / MARKET_TICKS;
       const noise = last * (Math.random() * 2 * tickAmp - tickAmp + tickBias);
       const newPrice = Math.max(last + noise, 1);
