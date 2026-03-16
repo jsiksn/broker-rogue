@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     lineHeight: 58,
     letterSpacing: -2,
-    fontFamily: 'Fredoka_700Bold',
+    fontFamily: 'Fredoka_600SemiBold',
   },
   titleAccent: {
     color: 'rgba(255,255,255,0.85)',
@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
     lineHeight: 58,
     letterSpacing: -2,
     marginBottom: 16,
-    fontFamily: 'Fredoka_700Bold',
+    fontFamily: 'Fredoka_600SemiBold',
   },
   tagline: {
     color: 'rgba(255,255,255,0.75)',
     fontSize: 13,
     letterSpacing: 0.5,
-    fontFamily: 'Fredoka_700Bold',
+    fontFamily: 'Fredoka_600SemiBold',
   },
   body: {
     flex: 1,
@@ -176,13 +176,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '900',
     letterSpacing: -0.5,
-    fontFamily: 'Fredoka_700Bold',
+    fontFamily: 'Fredoka_600SemiBold',
   },
   modeKorean: {
     color: 'rgba(255,255,255,0.75)',
     fontSize: 14,
     fontWeight: '600',
-    fontFamily: 'Fredoka_700Bold',
+    fontFamily: 'Fredoka_600SemiBold',
   },
   modeMeta: {
     flexDirection: 'row',

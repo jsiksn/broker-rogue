@@ -126,9 +126,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  totalLabel: { fontSize: 13, fontWeight: '800', letterSpacing: 1, fontFamily: 'Fredoka_700Bold' },
+  totalLabel: { fontSize: 13, fontWeight: '800', letterSpacing: 1, fontFamily: 'Fredoka_600SemiBold' },
   totalRight: { alignItems: 'flex-end' },
-  totalValue: { fontSize: 20, fontWeight: '900', letterSpacing: 0.75, fontFamily: 'Fredoka_700Bold' },
+  totalValue: { fontSize: 20, fontWeight: '900', letterSpacing: 0.75, fontFamily: 'Fredoka_600SemiBold' },
   totalChange: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   progressBar: {
     height: 4,

@@ -1,13 +1,13 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useFonts, Fredoka_700Bold } from '@expo-google-fonts/fredoka';
+import { useFonts, Fredoka_600SemiBold } from '@expo-google-fonts/fredoka';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded] = useFonts({ Fredoka_700Bold });
+  const [loaded] = useFonts({ Fredoka_600SemiBold });
 
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();

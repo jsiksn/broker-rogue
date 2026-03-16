@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+
+function confirm(title: string, message: string, onConfirm: () => void) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n${message}`)) onConfirm();
+  } else {
+    Alert.alert(title, message, [
+      { text: '취소', style: 'cancel' },
+      { text: '확인', onPress: onConfirm },
+    ]);
+  }
+}
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, MODE_CONFIG } from '../src/store/gameStore';
 import StockChart from '../src/components/StockChart';
@@ -149,14 +160,7 @@ export default function GameScreen() {
             <Feather name={isDark ? 'sun' : 'moon'} size={17} color="#94A3B8" />
           </Pressable>
           <Pressable style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }} onPress={() => {
-            Alert.alert(
-              '메인 화면으로',
-              '메인 화면으로 나가겠습니까?\n현재 진행 상황은 저장되지 않습니다.',
-              [
-                { text: '취소', style: 'cancel' },
-                { text: '나가기', style: 'destructive', onPress: () => router.replace('/') },
-              ]
-            );
+            confirm('메인 화면으로', '메인 화면으로 나가겠습니까?\n현재 진행 상황은 저장되지 않습니다.', () => router.replace('/'));
           }}>
             <Feather name="home" size={17} color="#94A3B8" />
           </Pressable>
@@ -211,14 +215,7 @@ export default function GameScreen() {
         style={({ pressed }) => [styles.nextDayBtn, pressed && styles.btnPressed]}
         onPress={() => {
           if (marketTick < MARKET_TICKS - 1) {
-            Alert.alert(
-              '장 마감 전',
-              '아직 장이 마감되지 않았습니다.\n다음날로 넘어가겠습니까?',
-              [
-                { text: '취소', style: 'cancel' },
-                { text: '확인', onPress: endTurn },
-              ]
-            );
+            confirm('장 마감 전', '아직 장이 마감되지 않았습니다.\n다음날로 넘어가겠습니까?', endTurn);
           } else {
             endTurn();
           }
@@ -256,7 +253,7 @@ const styles = StyleSheet.create({
     paddingTop: 56,
     paddingBottom: 14,
   },
-  gameTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', letterSpacing: -0.5, fontFamily: 'Fredoka_700Bold' },
+  gameTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', letterSpacing: -0.5, fontFamily: 'Fredoka_600SemiBold' },
   roundLabel: { fontSize: 11, fontWeight: '600', marginTop: 1 },
   dayBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -280,11 +277,11 @@ const styles = StyleSheet.create({
   },
   chartRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   tickerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  ticker: { fontSize: 13, fontWeight: '800', letterSpacing: 1, fontFamily: 'Fredoka_700Bold' },
+  ticker: { fontSize: 13, fontWeight: '800', letterSpacing: 1, fontFamily: 'Fredoka_600SemiBold' },
   pill: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 2 },
   pillText: { fontSize: 10, fontWeight: '700' },
   priceRight: { alignItems: 'flex-end' },
-  price: { fontSize: 20, fontWeight: '900', letterSpacing: 0.75, fontFamily: 'Fredoka_700Bold' },
+  price: { fontSize: 20, fontWeight: '900', letterSpacing: 0.75, fontFamily: 'Fredoka_600SemiBold' },
   openLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   timeLabel: { fontSize: 9, letterSpacing: 1 },
   chartDivider: { borderBottomWidth: 1 },
@@ -305,5 +302,5 @@ const styles = StyleSheet.create({
     paddingVertical: 15, alignItems: 'center',
   },
   btnPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
-  nextDayText: { color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 4, fontFamily: 'Fredoka_700Bold' },
+  nextDayText: { color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 4, fontFamily: 'Fredoka_600SemiBold' },
 });
