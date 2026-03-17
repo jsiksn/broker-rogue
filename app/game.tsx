@@ -211,29 +211,37 @@ export default function GameScreen() {
       </View>
 
       {/* NEXT DAY */}
-      <Pressable
-        style={({ pressed }) => [styles.nextDayBtn, pressed && styles.btnPressed]}
-        onPress={() => {
-          if (marketTick < MARKET_TICKS - 1) {
-            confirm('장 마감 전', '아직 장이 마감되지 않았습니다.\n다음날로 넘어가겠습니까?', endTurn);
-          } else {
-            endTurn();
-          }
-        }}
-      >
-        <LinearGradient
-          colors={
-            nextPriceDirection === 'up' ? ['#059669', '#10B981'] :
-            nextPriceDirection === 'down' ? ['#DC2626', '#EF4444'] :
-            isDark ? ['#d97706', '#c2410c'] : ['#F59E0B', '#EA580C']
-          }
-          start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextDayGradient}
+      <View style={styles.nextDayRow}>
+        <Pressable
+          style={({ pressed }) => [styles.nextDayBtn, pressed && styles.btnPressed]}
+          onPress={() => {
+            if (marketTick < MARKET_TICKS - 1) {
+              confirm('장 마감 전', '아직 장이 마감되지 않았습니다.\n다음날로 넘어가겠습니까?', endTurn);
+            } else {
+              endTurn();
+            }
+          }}
         >
-          <Text style={styles.nextDayText}>
-            NEXT DAY{nextPriceDirection === 'up' ? '  ▲' : nextPriceDirection === 'down' ? '  ▼' : ''}
-          </Text>
-        </LinearGradient>
-      </Pressable>
+          <LinearGradient
+            colors={isDark ? ['#d97706', '#c2410c'] : ['#F59E0B', '#EA580C']}
+            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextDayGradient}
+          >
+            <Text style={styles.nextDayText}>NEXT DAY</Text>
+          </LinearGradient>
+        </Pressable>
+
+        {/* 효과 뱃지 */}
+        {nextPriceDirection != null && (
+          <View style={[styles.signalBadge, { backgroundColor: nextPriceDirection === 'up' ? '#059669' : '#DC2626' }]}>
+            <Feather name={nextPriceDirection === 'up' ? 'trending-up' : 'trending-down'} size={18} color="#FFFFFF" />
+          </View>
+        )}
+        {pending.volatilityMultiplier > 1 && (
+          <View style={[styles.signalBadge, { backgroundColor: '#D97706' }]}>
+            <Feather name="alert-triangle" size={18} color="#FFFFFF" />
+          </View>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -290,8 +298,11 @@ const styles = StyleSheet.create({
   cardsLabel: { fontSize: 10, letterSpacing: 3, fontWeight: '700' },
   cardsCount: { color: '#10B981', fontSize: 10, fontWeight: '700' },
 
+  nextDayRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+  },
   nextDayBtn: {
-    borderRadius: 20, overflow: 'hidden',
+    flex: 1, borderRadius: 20, overflow: 'hidden',
     shadowColor: '#F59E0B',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -300,6 +311,15 @@ const styles = StyleSheet.create({
   },
   nextDayGradient: {
     paddingVertical: 15, alignItems: 'center',
+  },
+  signalBadge: {
+    width: 44, height: 44, borderRadius: 22,
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   btnPressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
   nextDayText: { color: '#FFFFFF', fontSize: 13, fontWeight: '900', letterSpacing: 4, fontFamily: 'Fredoka_600SemiBold' },
