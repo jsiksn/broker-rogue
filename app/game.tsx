@@ -238,7 +238,7 @@ export default function GameScreen() {
         )}
         {pending.volatilityMultiplier > 1 && (
           <View style={[styles.signalBadge, { backgroundColor: '#D97706' }]}>
-            <Feather name="alert-triangle" size={18} color="#FFFFFF" />
+            <Feather name="radio" size={18} color="#FFFFFF" />
           </View>
         )}
       </View>
