@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Platform, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -172,11 +172,13 @@ function FanCard({
           width: CARD_W,
           height: CARD_H,
           zIndex,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: isSelected ? 8 : 4 },
-          shadowOpacity: isSelected ? 0.22 : 0.12,
-          shadowRadius: isSelected ? 12 : 6,
-          elevation: isSelected ? 10 : 4,
+          ...(Platform.OS !== 'web' && {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: isSelected ? 8 : 4 },
+            shadowOpacity: isSelected ? 0.22 : 0.12,
+            shadowRadius: isSelected ? 12 : 6,
+            elevation: isSelected ? 10 : 4,
+          }),
         },
         animStyle,
       ]}
